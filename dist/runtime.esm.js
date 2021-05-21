@@ -16,6 +16,23 @@ function isHasExtractProp(el) {
     });
     return Boolean(res);
 }
+/**
+ * 往上寻找组件树直到 root，寻找是否有祖先组件绑定了同类型的事件
+ * @param node 当前组件
+ * @param type 事件类型
+ */
+function isParentBinded(node, type) {
+    var _a;
+    let res = false;
+    while ((node === null || node === void 0 ? void 0 : node.parentElement) && node.parentElement._path !== 'root') {
+        if ((_a = node.parentElement.__handlers[type]) === null || _a === void 0 ? void 0 : _a.length) {
+            res = true;
+            break;
+        }
+        node = node.parentElement;
+    }
+    return res;
+}
 
 const CurrentReconciler = Object.assign({
     getLifecyle(instance, lifecyle) {
@@ -154,27 +171,20 @@ function eventHandler(event) {
         };
         if (typeof CurrentReconciler.batchedEventUpdates === 'function') {
             const type = event.type;
-            // 不做上层判断，直接调用
-            CurrentReconciler.batchedEventUpdates(() => {
-                if (eventsBatch[type]) {
-                    eventsBatch[type].forEach(fn => fn());
-                    delete eventsBatch[type];
-                }
-                dispatch();
-            });
-            // if (!isParentBinded(node, type) || (type === 'touchmove' && !!node.props.catchMove)) {
-            //   // 最上层组件统一 batchUpdate
-            //   CurrentReconciler.batchedEventUpdates(() => {
-            //     if (eventsBatch[type]) {
-            //       eventsBatch[type].forEach(fn => fn())
-            //       delete eventsBatch[type]
-            //     }
-            //     dispatch()
-            //   })
-            // } else {
-            //   // 如果上层组件也有绑定同类型的组件，委托给上层组件调用事件回调
-            //   (eventsBatch[type] ||= []).push(dispatch)
-            // }
+            if (!isParentBinded(node, type) || (type === 'touchmove' && !!node.props.catchMove)) {
+                // 最上层组件统一 batchUpdate
+                CurrentReconciler.batchedEventUpdates(() => {
+                    if (eventsBatch[type]) {
+                        eventsBatch[type].forEach(fn => fn());
+                        delete eventsBatch[type];
+                    }
+                    dispatch();
+                });
+            }
+            else {
+                // 如果上层组件也有绑定同类型的组件，委托给上层组件调用事件回调
+                (eventsBatch[type] || (eventsBatch[type] = [])).push(dispatch);
+            }
         }
         else {
             dispatch();
