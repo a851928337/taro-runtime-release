@@ -1,6 +1,6 @@
 {
   "name": "@tarojs/runtime",
-  "version": "3.2.8-v2",
+  "version": "3.2.8-v3",
   "description": "taro runtime for mini apps.",
   "main": "dist/runtime.esm.js",
   "module": "dist/runtime.esm.js",
@@ -14,7 +14,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/a851928337/taro-runtime-release-v2"
+    "url": "https://github.com/a851928337/taro-runtime-release-v2#master"
   },
   "author": "yuche",
   "license": "MIT",

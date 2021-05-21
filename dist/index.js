@@ -177,7 +177,8 @@ function eventHandler(event) {
         };
         if (typeof CurrentReconciler.batchedEventUpdates === 'function') {
             var type = event.type;
-            if (!isParentBinded(node, type) || (type === 'touchmove' && !!node.props.catchMove)) {
+            // change事件不会冒泡，无法委托给上层组件
+            if (!isParentBinded(node, type) || (type === 'touchmove' && !!node.props.catchMove) || type === 'change') {
                 // 最上层组件统一 batchUpdate
                 CurrentReconciler.batchedEventUpdates(function () {
                     if (eventsBatch[type]) {
